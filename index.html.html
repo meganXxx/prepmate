@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrepMate | Complete Acquisition Command Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Manrope', sans-serif; background-color: #0B0F19; color: #F3F4F6; }
+        .glass-panel { background: rgba(23, 32, 53, 0.5); border: 1px solid rgba(255, 255, 255, 0.06); backdrop-filter: blur(16px); }
+        .glass-card { background: rgba(23, 32, 53, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(12px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .code-pill { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.65rem; color: #94a3b8; }
+        .nav-tab { border-bottom: 2px solid transparent; color: #64748b; transition: all 0.2s; }
+        .nav-tab.active { border-bottom: 2px solid #E53E3E; color: #E53E3E; font-weight: 800; }
+        .lead-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); border-left: 4px solid transparent; }
+        .lead-card.active { background: rgba(229, 62, 62, 0.06); border-color: #E53E3E; border-left-width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 10px; }
+        input[type=range] { accent-color: #E53E3E; }
+        .editable-field:hover { background-color: rgba(255, 255, 255, 0.03); outline: 1px dashed rgba(229, 62, 62, 0.4); cursor: text; }
+        .crimson-text { color: #E53E3E; }
+    </style>
+</head>
+<body class="overflow-hidden flex flex-col justify-between h-screen p-6">
+
+    <header class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-3">
+            <div class="w-2.5 h-5 bg-[#E53E3E] rounded-full"></div>
+            <h1 class="text-lg font-black tracking-tight">PREPMATE</h1>
+            <span class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700 font-mono hidden xl:inline-block">DEMO_Version</span>
+            <button id="view-mode-dashboard" onclick="toggleGlobalView('dashboard')" class="px-4 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all bg-[#E53E3E] text-white no-export ml-2">Ecosystem Dashboard</button>
+        </div>
+        
+        <div class="flex items-center gap-5">
+            <nav class="flex bg-slate-950/40 p-0.5 rounded-xl border border-slate-800/60 no-export">
+                <button id="view-mode-rank" onclick="toggleGlobalView('rank')" class="px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:text-white">KPI-Driven Lead Ranking Engine</button>
+                <button id="view-mode-social" onclick="toggleGlobalView('social')" class="px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:text-white">Agentic AI Social Discovery</button>
+                <button id="view-mode-narratives" onclick="toggleGlobalView('narratives')" class="px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:text-white">Acquisition Narratives AI</button>
+                <button id="view-mode-whatsapp" onclick="toggleGlobalView('whatsapp')" class="px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:text-white">WhatsApp AI</button>
+            </nav>
+            
+            <div class="flex items-center gap-4 no-export">
+                <label class="flex items-center bg-slate-900/60 border border-slate-800 rounded-full pl-3 pr-4 py-1 cursor-pointer">
+                    <span class="text-[9px] font-bold text-slate-400 mr-2 uppercase tracking-wider">Brainstorm Edit Mode</span>
+                    <input type="checkbox" id="edit-mode-toggle" class="sr-only" onchange="toggleWorkspaceEdit()">
+                    <div class="w-7 h-4 bg-slate-700 rounded-full relative transition-colors" id="toggle-bg">
+                        <div class="w-3 h-3 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform" id="toggle-dot"></div>
+                    </div>
+                </label>
+                <button onclick="exportWorkspaceSnap()" class="bg-white/5 border border-white/10 text-white text-[9px] font-bold px-4 py-1.5 rounded-full hover:bg-[#E53E3E] hover:border-[#E53E3E] transition-all">EXPORT SUMMARY</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex-1 my-4 overflow-hidden relative">
+        
+        <div id="workspace-view-dashboard" class="h-full grid grid-cols-1 lg:grid-cols-12 gap-5 overflow-hidden animate-in fade-in duration-300">
+            <aside class="lg:col-span-4 flex flex-col justify-between overflow-hidden glass-panel rounded-2xl p-4">
+                <div class="flex flex-col overflow-hidden flex-1">
+                    <div class="mb-4 space-y-3 bg-slate-950/40 p-3 rounded-xl border border-white/5">
+                        <div class="flex justify-between items-center">
+                            <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Quota Pacing Matrix</label>
+                            <select id="rep-quota-state" onchange="handleQuotaOverride(this.value)" class="bg-slate-900 border border-slate-700 text-white text-[10px] font-bold px-2 py-1 rounded outline-none focus:border-red-500">
+                                <option value="quota">Behind KPI (&lt;50% KPI Gap)</option>
+                                <option value="std">Standard (&gt;100% Achieved)</option>
+                            </select>
+                        </div>
+                        <div>
+                           
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between mb-2 px-1">
+                        <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Calculated Priorities List</span>
+                        <span class="text-[9px] text-slate-500 font-mono" id="queue-count">0 Targets Prioritized</span>
+                    </div>
+                    <div id="pipeline-leads-list" class="flex-1 overflow-y-auto sidebar-scroll space-y-2 pr-1"></div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-800">
+                    <div class="flex items-center gap-1.5 mb-2">
+                        <span>🤖</span>
+                        <h4 class="text-[10px] font-black uppercase text-indigo-400 tracking-widest">AI KPI Pacing Worklist</h4>
+                    </div>
+                    <div id="pacing-worklist-panel" class="bg-indigo-950/20 border border-indigo-500/20 rounded-xl p-3 text-[10px] leading-relaxed text-slate-300"></div>
+                </div>
+            </aside>
+
+            <section class="lg:col-span-8 flex flex-col overflow-hidden glass-panel rounded-2xl">
+                <nav class="flex border-b border-slate-800 bg-slate-950/40 px-6 pt-3 gap-6 no-export">
+                    <button id="hub-tab-0" onclick="switchHubView(0)" class="nav-tab active pb-2 text-xs uppercase font-extrabold tracking-wider">Strategic Intelligence Vendor Profile</button>
+                    <button id="hub-tab-1" onclick="switchHubView(1)" class="nav-tab pb-2 text-xs uppercase font-extrabold tracking-wider">Historical Context Loop</button>
+                    <button id="hub-tab-2" onclick="switchHubView(2)" class="nav-tab pb-2 text-xs uppercase font-extrabold tracking-wider">WhatsApp Support Agent</button>
+                </nav>
+                <div class="flex-1 p-6 overflow-y-auto space-y-6">
+                    <div id="hub-view-0" class="space-y-6 animate-in fade-in duration-200">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span id="active-prio-badge" class="bg-red-950/60 border border-red-500/30 text-[#E53E3E] font-mono text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">High-Value Target (P1)</span>
+                                <h2 id="active-merchant-name" class="text-3xl font-black text-white tracking-tight mt-2 mb-1">Loading Merchant...</h2>
+                                <p id="active-merchant-addr" class="text-xs text-slate-500 font-mono">Resolving physical address parameters</p>
+                            </div>
+                            <div class="text-right font-mono"><span id="active-merchant-grade" class="text-4xl font-black text-slate-700 border border-slate-800 bg-slate-900/30 px-3 py-1 rounded-xl">-</span></div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="bg-slate-900/40 border border-white/5 p-4 rounded-xl text-center">
+                                <div class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Google Reviews Count</div>
+                                <div id="m-google-val" class="text-xl font-bold text-white font-mono">0</div>
+                            </div>
+                            <div class="bg-slate-900/40 border border-white/5 p-4 rounded-xl text-center">
+                                <div class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Competitor Platform</div>
+                                <div id="m-comp-val" class="text-xl font-bold text-white font-mono">0</div>
+                            </div>
+                            <div class="bg-slate-900/40 border border-white/5 p-4 rounded-xl text-center relative overflow-hidden group">
+                                <div class="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-1 flex justify-center items-center gap-1">
+                                    <span>Agentic Social Feed</span><span class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping"></span>
+                                </div>
+                                <div id="m-ig-val" class="text-xl font-bold text-indigo-300 font-mono">0</div>
+                            </div>
+                        </div>
+                        <div class="bg-black/50 border border-indigo-500/20 rounded-xl overflow-hidden flex flex-col min-h-[140px]">
+                            <div class="bg-slate-950/80 px-4 py-2 border-b border-white/5 flex justify-between items-center text-[9px] font-mono text-indigo-400 tracking-widest">
+                                <span>BACKEND_AGENTIC_AI_SOCIAL_ENGINE</span><span class="animate-pulse font-bold">● ENGINE CONSOLE ACTIVE</span>
+                            </div>
+                            <div id="agentic-terminal-log" class="p-4 flex-1 font-mono text-[10px] leading-relaxed text-indigo-100/90 whitespace-pre-wrap"></div>
+                        </div>
+                        <div class="border border-amber-500/20 rounded-xl overflow-hidden shadow-xl shadow-amber-950/5">
+                            <div class="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2.5 flex justify-between items-center">
+                                <span class="text-[9px] font-mono font-bold text-amber-400 tracking-wider uppercase">AI-Generated Sales Narrative</span>
+                                <button onclick="alert('Copied Pitch Script Workspace Data cleanly!')" class="bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-white px-3 py-1 rounded text-[9px] font-bold transition-all uppercase tracking-tight">Copy Script Narrative</button>
+                            </div>
+                            <div class="p-5 space-y-4 bg-slate-950/20 text-xs leading-relaxed">
+                                <div>
+                                    <h4 class="text-[9px] font-bold text-amber-500 uppercase tracking-widest mb-1.5">Part 1: Context Layer (Logic Synthesis Summary)</h4>
+                                    <div id="pitch-context-node" class="text-slate-300 italic border-l-2 border-amber-500/30 pl-3"></div>
+                                </div>
+                                <div class="pt-3 border-t border-white/5">
+                                    <h4 class="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mb-1.5">Part 2: Angle Layer (Suggested Narratives)</h4>
+                                    <div id="pitch-angle-node" class="text-emerald-50/90 font-semibold bg-emerald-950/10 p-3 rounded-lg border border-emerald-500/10"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="hub-view-1" class="hidden space-y-4 animate-in fade-in duration-200">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="text-xs font-black uppercase tracking-wider text-slate-400">Interaction History & Speech Progress Summaries</h4>
+                            <span class="code-pill">Q3_VOICE_AI_TRANSCRIPTS_STREAMING</span>
+                        </div>
+                        <div class="space-y-3" id="history-timeline-node"></div>
+                    </div>
+ <div id="hub-view-2" class="hidden h-full flex flex-col justify-center items-center animate-in fade-in duration-200">
+    <div class="w-full max-w-[440px] h-[480px] bg-[#111B21] rounded-2xl border border-slate-800 flex flex-col overflow-hidden shadow-2xl">
+        
+        <div class="bg-[#202C33] p-3 flex items-center gap-3 border-b border-white/5">
+            <div class="w-7 h-7 rounded-full bg-purple-500 text-white font-bold flex items-center justify-center text-xs">AC</div>
+            <div>
+                <div class="text-xs font-bold text-slate-100">Acquisition Co-Pilot</div>
+                <div class="text-[8px] text-emerald-500 font-mono tracking-tight">AI Assistant • Active</div>
+            </div>
+        </div>
+        
+        <div id="whatsapp-message-box" class="flex-1 p-4 space-y-3 overflow-y-auto text-[11px] leading-relaxed relative sub-scroll sidebar-scroll">
+            
+            <div class="max-w-[85%] bg-[#202C33] p-2.5 rounded-xl rounded-tl-none text-slate-200">
+                <span class="text-emerald-400 font-bold">Account Summary: Burger Joint (ID: 4821)</span><br>
+                • Status: Contract signed today.<br>
+                • Next Step: Pending menu onboarding.<br><br>
+                💡 <span class="text-emerald-400 font-bold">FAQ Tip:</span> Merchants often ask about activation timeline here. (Answer: It takes 3-5 business days.)
+            </div>
+            <div class="flex justify-end">
+                <div class="max-w-[75%] bg-[#005C4B] p-2.5 rounded-xl rounded-tr-none text-white font-mono text-[9.5px] bg-opacity-90 border border-white/5">
+                    /send menu_template
+                </div>
+            </div>
+
+            <div class="max-w-[85%] bg-[#202C33] p-2.5 rounded-xl rounded-tl-none text-slate-200">
+                <span class="text-emerald-400 font-bold">Template Sent Successfully! 📄</span><br>
+                [Merchant_Menu_Template_v2.xlsx] has been shared with the merchant. Let me know if you need another account summary.
+            </div>
+
+        </div>
+        <div class="p-2.5 bg-[#202C33] flex gap-2 items-center">
+            <div class="flex-1 bg-[#2A3942] h-8 rounded-lg px-3 flex items-center text-[10px] text-slate-500">Connected to CRM & FAQ Library...</div>
+            <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs shadow-md font-bold">✓</div>
+        </div>
+
+    </div>
+</div>
+                    
+                </div>
+            </section>
+        </div>
+
+        <div id="workspace-view-rank" class="hidden h-full space-y-5 overflow-y-auto p-4 animate-in fade-in duration-300">
+            <div class="flex justify-between items-center bg-slate-950/40 p-1 rounded-xl w-fit border border-white/5">
+                <button id="tab-btn-blueprint" onclick="switchSubTab(0)" class="px-5 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all bg-[#E53E3E] text-white">1: Engine Blueprint</button>
+                <button id="tab-btn-simulator" onclick="switchSubTab(1)" class="px-5 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all text-slate-500 hover:text-white ml-1">2: Scoring Lab(WIP-DO NOT USE)</button>
+            </div>
+            
+            <div id="slide-1-tab-blueprint" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-card p-6 rounded-2xl border-t-2 border-emerald-500">
+                        <h4 class="text-xs font-black text-emerald-400 uppercase mb-2 tracking-widest">I. Layered Scoring Architecture</h4>
+                        <p class="text-[11px] font-mono text-slate-300 bg-slate-950/60 p-2.5 rounded-lg border border-white/5 mb-4 text-center">
+                            Total Priority Score = Vendor Grade Quality Floor (Tier 1) + Strategic Boosts (Tier 2-6)
+                        </p>
+                        <h5 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">The 6-Tier Matrix Architecture</h5>
+                        <div class="grid grid-cols-5 gap-y-2.5 text-[10px] font-mono items-center">
+                            <div class="col-span-2 text-slate-500">Tier 1: Quality Floor</div><div class="col-span-3 text-slate-200 text-right">Vendor Grade Increments (A: 30k | B: 20k | C: 10k | D: 0)</div>
+                            <div class="col-span-2 text-slate-500">Tier 2: Strategic Tags</div><div class="col-span-3 text-slate-200 text-right">+1,500 pts per active tag (Dream Brand, Top Search...)</div>
+                            <div class="col-span-2 text-slate-500">Tier 3: Online Presence Pulse</div><div class="col-span-3 text-slate-200 text-right">Online Metrics (Comp_Perf x2 | Google x1 | IG x0.1)</div>
+                            <div class="col-span-2 text-slate-500">Tier 4: Local Nuance</div><div class="col-span-3 text-slate-200 text-right">i.e. Cuisine Supply Vacuums (+1.2k) vs Over-saturated (-1k)</div>
+                            <div class="col-span-2 text-slate-500">Tier 5: Metadata Clean</div><div class="col-span-3 text-slate-200 text-right">+300 Verified Phone/Address | +500 Inbound Intent</div>
+                            <div class="col-span-2 text-slate-500">Tier 6: BD Activity</div><div class="col-span-3 text-slate-200 text-right">Warmth Acceleration (+1.5k Max) vs Neglect Time Decay</div>
+                        </div>
+                        <div class="mt-4 pt-2 border-t border-white/5 text-center"><span class="text-[10px] font-mono text-red-400">* Combined Boost (T2-T5) capped at 9,999 pts to protect T1</span></div>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl border-t-2 border-indigo-500 flex flex-col justify-between">
+                        <h4 class="text-xs font-black text-indigo-400 uppercase mb-4 tracking-widest">II. AI KPI Pacing Agent (Reverse Engineering)</h4>
+                        <div class="space-y-2 text-[10px] font-mono text-slate-300">
+                            <div class="bg-slate-950/40 p-2 border border-white/5 rounded-lg flex items-center gap-2"><span class="text-indigo-400">01</span> [ Read: Active Rep Monthly KPI Targets & Current Progress ]</div>
+                            <div class="text-center text-slate-600 text-xs">▼</div>
+                            <div class="bg-slate-950/40 p-2 border border-white/5 rounded-lg flex items-center gap-2"><span class="text-indigo-400">02</span> [ Track: Historical Rep-Specific Conversion Metrics (Win Rate) ]</div>
+                            <div class="text-center text-slate-600 text-xs">▼</div>
+                            <div class="bg-slate-950/40 p-2 border border-white/5 rounded-lg flex items-center gap-2"><span class="text-indigo-400">03</span> [ Compute: Agent Inverse-Engineers Pipeline Funnel Load Requirements ]</div>
+                            <div class="text-center text-slate-600 text-xs">▼</div>
+                            <div class="bg-slate-950/40 p-2 border border-white/5 rounded-lg flex items-center gap-2"><span class="text-indigo-400">04</span> [ Output: Dynamically Re-route and Inject Pipeline Priority Target Queues ]</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl border-l-4 border-amber-500 bg-amber-500/5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-amber-400">⚡</span>
+                        <h4 class="text-xs font-black text-amber-400 uppercase tracking-widest">Ecosystem Interactivity & Synergy</h4>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        The <b>Layered Scoring Architecture</b> acts as our mathematical foundation. Once the <b>AI KPI Pacing Agent</b> overlays onto this data framework, it translates abstract values into immediate, localized action fields.
+                    </p>
+                    <div class="mt-3 p-3 bg-slate-950/60 rounded-xl border border-amber-500/20 font-mono text-xs">
+                        <span class="text-slate-500 font-bold block mb-1 uppercase tracking-wider text-[9px]">Actionable Deliverables for BD Example:</span>
+                        <span class="text-emerald-400 font-bold">Daily Target Checklist:</span> "Today's Recommended Outbounds: 5 Leads (Est. call duration: 30 mins); Today's Recommended Field Visits: 3 Restaurants (System optimized shortest routing within a 3km commercial radius)."
+                    </div>
+                </div>
+            </div>
+
+            <div id="slide-1-tab-simulator" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="glass-card p-5 rounded-2xl space-y-5 self-start">
+                    <div>
+                        <label class="text-[9px] font-bold text-slate-500 uppercase block mb-2">Select Alignment Scenario</label>
+                        <select id="quota-bias" onchange="setPriorityMode(this.value)" class="w-full bg-slate-900 border border-slate-700 text-white text-xs font-bold p-2.5 rounded-xl outline-none focus:border-red-500">
+                            <option value="quota">Behind KPI Scenario (&lt;50% KPI Gap)</option>
+                            <option value="std">KPI Achieved Scenario (&gt;100% Achieved)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1.5 text-slate-300">
+                            <label class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Time Decay (T - Days Inertia)</label>
+                            <span id="neglect-val" class="text-xs font-mono font-bold crimson-text">0 days</span>
+                        </div>
+                        <input type="range" id="neglect-slider" min="0" max="45" value="0" oninput="updateNeglect(this.value)" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div class="pt-4 border-t border-white/5">
+                        <div class="flex items-center gap-2 mb-2"><span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">🤖 Pacing Agent Execution Engine</span></div>
+                        <div id="pacing-agent-checklist" class="bg-indigo-950/20 border border-indigo-500/20 rounded-xl p-3.5 text-[10px] leading-relaxed text-slate-200 font-sans"></div>
+                    </div>
+                </div>
+                <div class="lg:col-span-2 space-y-4 shadow-inner overflow-y-auto max-h-[380px] pr-1 sidebar-scroll" id="simulator-list"></div>
+            </div>
+        </div>
+
+        <div id="workspace-view-social" class="hidden h-full grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 overflow-hidden animate-in fade-in duration-300">
+            <div class="lg:col-span-5 flex flex-col justify-between p-1">
+                <div class="space-y-4">
+                    <div>
+                        <span class="text-[9px] font-bold crimson-text tracking-widest uppercase block font-mono">Reliability Matrix</span>
+                        <h3 class="text-3xl font-black text-white tracking-tight mt-1 mb-2">Agentic AI <span class="text-indigo-400">Social Discovery</span></h3>
+                        <p class="text-slate-400 text-xs leading-relaxed">Instead of relying on rigid, easily-blocked standard scrapers, PrepMate deploys an Autonomous Agentic Researcher. This agent mimics human browsing behavior to extract hidden social metrics (Instagram Followers and Facebook Likes) and immediately normalizes them into structured numerical data to fuel the Tier 3 (Live Market Pulse) Priority Engine.</p>
+                    </div>
+                    <div class="flex flex-col gap-2 no-export">
+                        <button onclick="switchAgentTree(0)" id="agent-btn-0" class="text-left p-3 rounded-xl glass-card border-l-2 border-indigo-500 text-xs font-bold text-white">General Process</button>
+                        <button onclick="switchAgentTree(1)" id="agent-btn-1" class="text-left p-3 rounded-xl hover:bg-slate-800 text-xs font-bold text-slate-500 transition-colors">Edge Case 1: Multi-Match Address Conflict</button>
+                        <button onclick="switchAgentTree(2)" id="agent-btn-2" class="text-left p-3 rounded-xl hover:bg-slate-800 text-xs font-bold text-slate-500 transition-colors">Edge Case 2:Zero Social Profile Fallback</button>
+                        <button onclick="switchAgentTree(3)" id="agent-btn-3" class="text-left p-3 rounded-xl hover:bg-slate-800 text-xs font-bold text-slate-500 transition-colors">Edge Case 3:Anti-Bot Telemetry Cooldown</button>
+                    </div>
+                </div>
+
+            </div>
+            <div class="lg:col-span-7 glass-card bg-black/40 rounded-2xl border border-indigo-500/30 shadow-lg flex flex-col overflow-hidden h-full max-h-[460px]">
+                <div class="bg-slate-900/80 px-4 py-2 border-b border-white/5 flex items-center justify-between shrink-0">
+                    <div class="flex gap-1.5"><div class="w-2 h-2 rounded-full bg-red-500/50"></div><div class="w-2 h-2 rounded-full bg-amber-500/50"></div><div class="w-2 h-2 rounded-full bg-emerald-500/50"></div></div>
+                    <div class="text-[9px] font-mono text-indigo-400 tracking-widest">AGENT_SHELL_Demo</div>
+                </div>
+                <div class="p-5 flex-1 text-[10.5px] font-mono leading-relaxed overflow-y-auto sidebar-scroll text-slate-300 whitespace-pre-wrap" id="agent-console"></div>
+                <div class="p-3 border-t border-white/5 bg-slate-900/30 flex justify-between items-center text-[9px] font-mono shrink-0">
+                    <div class="text-slate-600">Trace_ID: AI_AGENT_2333</div>
+                    <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span><span class="text-indigo-300 font-bold uppercase tracking-tighter">Live Log Stream Active</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="workspace-view-narratives" class="hidden h-full grid grid-cols-1 lg:grid-cols-5 gap-5 p-4 overflow-y-auto animate-in fade-in duration-300">
+            <div class="lg:col-span-5 text-center mb-1">
+                <span class="text-[10px] font-bold text-amber-500 uppercase tracking-[0.25em] block">Acquisition Narritives AI</span>
+                <h3 class="text-xl font-extrabold text-white tracking-tight mt-1">The Two-Part <span class="text-amber-400">Generative AI</span> Pitch Architecture</h3>
+                <div class="mt-3 flex justify-center no-export">
+                    <select onchange="updateObjection(this.value)" class="bg-slate-900 border border-slate-700 text-amber-400 text-xs font-bold px-3 py-1.5 rounded-lg outline-none focus:border-amber-500">
+                        <option value="commission">Commission Rate Objection (Too High)</option>
+                        <option value="exclusivity">Competitor Exclusivity Lock-in</option>
+                        <option value="tech">Operational Bandwidth / Tech Skepticism (SME)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="lg:col-span-2 glass-card p-4 rounded-2xl border border-slate-700/50 max-h-[300px] flex flex-col overflow-hidden">
+                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Input Payload (JSON)</span>
+                <div class="bg-slate-950/80 p-3 rounded-xl border border-white/5 overflow-auto flex-1 sidebar-scroll"><pre id="json-input" class="text-[10px] text-indigo-300 font-mono leading-tight whitespace-pre-wrap"></pre></div>
+            </div>
+
+            <div class="lg:col-span-3 glass-card rounded-2xl border border-amber-500/30 overflow-hidden flex flex-col max-h-[300px]">
+                <div class="bg-amber-950/30 border-b border-amber-500/20 px-6 py-3 flex justify-between items-center text-[9px] font-mono font-bold text-amber-200">
+                    <span>GEMINI-PRO-1.5_OUTPUT_WORKSPACE</span><div class="flex gap-1"><div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div><div class="w-1.5 h-1.5 rounded-full bg-amber-400/30"></div></div>
+                </div>
+                <div class="p-4 space-y-4 overflow-y-auto flex-1 sidebar-scroll">
+                    <div>
+                        <div class="text-[8.5px] font-bold text-amber-500 uppercase mb-1 tracking-widest">Part 1: Context Layer (Logic Synthesis)</div>
+                        <div id="sandbox-context" class="text-amber-100/90 text-xs leading-relaxed italic border-l border-amber-500/30 pl-3 py-0.5"></div>
+                    </div>
+                    <div class="pt-3 border-t border-white/5">
+                        <div class="text-[8.5px] font-bold text-emerald-400 uppercase mb-1 tracking-widest">Part 2: Angle Layer (Suggested Script)</div>
+                        <div id="sandbox-angle" class="text-emerald-50/90 text-sm leading-relaxed font-semibold"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="workspace-view-whatsapp" class="hidden h-full grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 items-center overflow-y-auto animate-in fade-in duration-300">
+            <div class="lg:col-span-5 space-y-4">
+                <span class="text-[9px] font-bold tracking-widest text-purple-400 uppercase block">Vendor Acquisition Support AI Agent</span>
+                <h3 class="text-2xl font-extrabold tracking-tight text-white">Smart Co-Pilot <br><span class="text-purple-400">for Acquisition Reps</span></h3>
+                <div class="space-y-3.5 text-[11px] text-slate-400 leading-relaxed">
+                    <div class="flex gap-3"><span class="text-base">💬</span><p><b>Instant Context Summaries:</b> Get a quick snapshot of a vendor's context, past interactions, and current pipeline status directly inside WhatsApp—no need to log back into the Salesforce.</p></div>
+                    <div class="flex gap-3"><span class="text-base">📚</span><p><b>Automated FAQ Replies:</b> Instantly resolve common vendor questions by fetching accurate answers from our centralized FAQ or Best Practices library in real-time.</p></div>
+                    <div class="flex gap-3"><span class="text-base">📄</span><p><b>Smart Document Templates:</b> IPull and share required contract templates, onboarding checklists, or menu sheets with a single tap, keeping the deal moving forward.</p></div>
+                </div>
+            </div>
+            <div class="lg:col-span-7 flex justify-center">
+                <div class="w-full max-w-[360px] h-[350px] bg-[#111B21] rounded-2xl border-[4px] border-slate-800 shadow-xl overflow-hidden flex flex-col">
+                    <div class="bg-[#202C33] p-3 flex items-center gap-3 border-b border-white/5">
+                        <div class="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center text-[10px] font-bold text-white">PA</div>
+                        <div><div class="text-xs font-bold text-slate-100">Acquisition PrepMate Co-Pilot</div><div class="text-[8px] text-emerald-500 font-mono">AI Assistant • Active</div></div>
+                    </div>
+                   <div class="flex-1 p-3 space-y-2.5 overflow-y-auto text-[10.5px] leading-relaxed sidebar-scroll">
+    <div class="max-w-[85%] bg-[#202C33] p-2.5 rounded-xl rounded-tl-none text-slate-200">
+        <span class="text-emerald-400 font-bold">Account Summary: Burger Joint (ID: 4821)</span><br>
+        • Status: Contract signed today.<br>
+        • Next Step: Pending menu onboarding.<br><br>
+        💡 <span class="text-emerald-400 font-bold">FAQ Tip:</span> Merchants often ask about activation timeline here. (Answer: It takes 3-5 business days.)
+    </div>
+    <div class="flex justify-end">
+        <div class="max-w-[75%] bg-[#005C4B] p-2.5 rounded-xl rounded-tr-none text-white font-mono text-[10px] bg-opacity-90 border border-white/5">
+            /send menu_template
+        </div>
+    </div>
+    <div class="max-w-[85%] bg-[#202C33] p-2.5 rounded-xl rounded-tl-none text-slate-200">
+        <span class="text-emerald-400 font-bold">Template Sent Successfully! 📄</span><br>
+        [Merchant_Menu_Template_v2.xlsx] has been shared with the merchant. Let me know if you need another account summary.
+    </div>
+</div>
+                    <div class="p-2 bg-[#202C33] flex items-center gap-2 text-[10px] text-slate-500 font-mono px-3 border-t border-white/5"><span>✓ Connected to Vendor Context & FAQ Library</span></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="border-t border-slate-800 pt-3 flex justify-between items-center text-[10px] text-slate-500">
+        <div class="font-mono tracking-widest uppercase">Ecosystem Modeling System • Workshop Mode</div>
+        <div class="font-mono text-slate-400 font-bold" id="panel-state-tracker">Ecosystem Dashboard View Active</div>
+    </footer>
+
+    <script>
+        let currentPacingMode = 'quota';
+        let currentDecayInertiaT = 0;
+        let selectedMerchantKey = 'Tornet';
+        let currentSlideIndex = 0;
+        let activeSlide1Tab = 0;
+        let neglectDays = 0;
+
+const completeMerchantDataWarehouse = {
+    'Tornet': {
+        name: "Tornet Kolgrill Limhamn", address: "Lundavägen 67, Malmö", grade: "A", phone: "+46700123456", email: "tornet@example.com",
+        tags: ["Top Search", "Low Choice"], nuance: 1200, clean: 300, attempts: 3,
+        metrics: { google: 1088, density: 410, ig: 845 },
+        friction: "Competitor Exclusivity Lock-in (Locked with FoodDelivery Global Contract)",
+        agentLog: `[LOG] Deploying Meta profile resolver: "Tornet Limhamn Malmo"\n> CONFLICT: Multi-match found (2 instances).\n> ENGINE ACTION: Calculating Levenshtein coordinate distance mappings against CRM metadata...\nCandidate_1 Distance Error: 0.04 Match [Lundavägen 67, Malmö]\nCandidate_2 Distance Error: 0.88 Match [Alternative Region]\n[STATUS]: Merged profile record automatically (96% accuracy assurance passed).\n[OUTPUT]: Extracted 845 Instagram fans safely. Injecting priority weight ledger...`,
+        pitchContext: "Tornet Kolgrill presents an elite local footprint matching 410 category rivals. Local supply map analytics track an active trend vacuum for high-end Turkish concepts. Voice AI session transcript histories indicate management is currently bound under exclusivity clauses with an alternate platform.",
+        pitchAngle: "【Exclusivity Lock-in - Weekend Peak Overflow Solution】\n\"Hi Tornet Management Team, we notice a massive spike in local search traffic for premium Turkish grill concepts in Limhamn, yet the local supply is severely hitting a wall. We completely respect your current exclusive contract with your primary platform. However, we also understand how incredibly frustrating it is when your primary partner suffers from driver delays during intensive weekend rushes, leading to cold food and unhappy customers. PrepMate wants to offer you a zero-risk, contract-compliant 'logistics safety net.' We can configure your store to activate strictly during peak dinner/lunch rushes when your primary provider hits bottlenecks, capturing revenue that would otherwise be permanently lost. Let's protect your weekend profits without breaking your exclusivity. Can we explore this approach this week?\"",
+        history: [
+            { type: "call", date: "May 12, 2026", user: "BD Rep Marcus", text: "Spoke with manager. Expressed massive strain regarding partner fulfillment delays during weekend spikes." },
+            { type: "voice", date: "May 25, 2026", user: "Voice Assist", text: "Parsed Session: Merchant highly interested but feels bound by exclusivity penalties. Expressed severe fear of breach-of-contract fines." }
+        ],
+        chat: [
+            { 
+                side: "agent", 
+                text: `Account Summary: Tornet Kolgrill Limhamn (ID: Tornet)\n• Status: Highly interested; heavily bound by primary competitor exclusivity.\n• Next Step: Propose Weekend Peak Overflow 'Logistics Safety Net'.\n\n💡 FAQ Tip: If a merchant has an exclusivity contract, remind them our peak-hour configuration is entirely contract-compliant and carries zero legal risk.` 
+            },
+            { 
+                side: "vendor", 
+                text: "/send exclusivity_safety_net_proposal" 
+            },
+            { 
+                side: "agent", 
+                text: `Template Sent Successfully! 📄\n[Tornet_Weekend_Overflow_Proposal.pdf] has been shared with the merchant. Let me know if you need another account summary.` 
+            }
+        ]
+    },
+    'DINDIN': {
+        name: "DIN-DIN club", address: "94 Drottninggatan, Uppsala", grade: "A", phone: "+46703456789", email: "dindin@example.com",
+        tags: ["Dream Brand", "Top Search", "Top GTC"], nuance: 1500, clean: 500, attempts: 1,
+        metrics: { google: 452, density: 312, ig: 1305 },
+        friction: "Commission Resistance (Refuses default 30% take-rate margin schedule)",
+        agentLog: `[LOG] Deploying Meta profile resolver: "DINDIN club Uppsala"\n[STATUS]: Profile identified with clean signature. No multi-match variance resolved.\n> Extracting user engagement data nodes via headless telemetry...\n[SUCCESS]: Extracted 1,305 active Instagram fans. Synced database logs cleanly.`,
+        pitchContext: "DIN-DIN club operates inside an aggressive +120% consumer surge area for Asian Fusion concepts. Voice AI call notes tracking verifies the founder flatly refuses our default 30% commission framework, citing localized margin pressure and high tablet tech fatigue across their plating line.",
+        pitchAngle: "【Commission & Tech Fatigue - Cloud Integration & Profit Protection】\n\"Hi DIN-DIN club founder, our regional data shows a massive +120% surge in customer demand for Asian Fusion concepts right in Uppsala. We completely get why you flatly refuse standard 30% platform fees—with rising ingredient costs, margins are thin, and the last thing your staff needs is another glitchy tablet cluttering the line. PrepMate handles things differently. First, we bypass hardware entirely: our system links directly to your existing Trivec cloud POS with zero countertop clutter. Second, because your volume potential is so high, we are ready to move away from rigid pricing models and propose a customized, tiered margin framework designed to protect your bottom line. We bring you pure net-new customer volume to dilute your fixed operating overhead. Let's spend 5 minutes reviewing our margin-matched simulation?\"",
+        history: [
+            { type: "visit", date: "April 18, 2026", user: "BD Rep Sarah", text: "Physical field visit on Drottninggatan. Owner expressed intense tech fatigue. Refuses to add another machine to their cramped counter space." },
+            { type: "voice", date: "May 02, 2026", user: "Voice Assist", text: "Parsed Session: Follow-up delivered. Owner replied that platform fees must drop below 18% or deal is dead." }
+        ],
+        chat: [
+            { 
+                side: "agent", 
+                text: `Account Summary: DIN-DIN club (ID: DINDIN)\n• Status: High-volume prospect resisting standard 30% fees & tablet hardware clutter.\n• Next Step: Propose cloud integration & tiered margin framework (<18%).\n\n💡 FAQ Tip: To combat intense counter tech fatigue, highlight our seamless direct cloud integration with Trivec POS which bypasses hardware entirely.` 
+            },
+            { 
+                side: "vendor", 
+                text: "/send trivec_cloud_integration_sheet" 
+            },
+            { 
+                side: "agent", 
+                text: `Template Sent Successfully! 📄\n[DINDIN_Trivec_POS_Integration_Specs.pdf] has been shared with the merchant. Let me know if you need another account summary.` 
+            }
+        ]
+    },
+    'Sannegarden': {
+        name: "Sannegården Karlskoga", address: "Frödingsvägen 14, Karlskoga", grade: "A", phone: "+46705678901", email: "sannegarden@example.com",
+        tags: ["Top GTC", "Low Choice"], nuance: 800, clean: 300, attempts: 2,
+        metrics: { google: 1215, density: 540, ig: 2088 },
+        friction: "Operational Overhead (SME scale understaffing worries)",
+        agentLog: `[LOG] Deploying Meta profile resolver: "Sannegarden Karlskoga"\n[STATUS]: Clean verification match.\n> Parsing cross-platform buzz constants...\n[SUCCESS]: Tracked 2,088 highly engaged followers. Injecting variable scores.`,
+        pitchContext: "Sannegården is an absolute local giant with over 1,200 Google reviews, standing out across 540 regional competitors. Operational session logs track that the team wants to expand into delivery but is severely bottlenecked by extreme kitchen understaffing challenges.",
+        pitchAngle: "【Understaffing Headwinds - Automated Pace Control Solution】\n\"Hello Sannegården team! Massive congratulations on crossing 1,200+ high-rated Google reviews—you are an undisputed local giant in Karlskoga. We know you want to expand into high-volume delivery, but we also deeply understand the crushing pressure of running short-staffed down two line cooks right now. PrepMate acts as an invisible digital kitchen runner so your team doesn't lift a finger. Our platform integrates completely in the background and features a smart 'order pacing throttle.' If your back-of-house gets slammed with dine-in crowds, our system automatically stretches out or pauses incoming delivery orders without requiring manual intervention from your staff. Let us help you turn local demand into revenue while fully protecting your kitchen team's sanity!\"",
+        history: [
+            { type: "call", date: "May 05, 2026", user: "BD Rep Dave", text: "Initial inbound verification call. Manager loves the concept but stated they are currently running down 2 line cooks and cannot handle extra friction." }
+        ],
+        chat: [
+            { 
+                side: "agent", 
+                text: `Account Summary: Sannegården Karlskoga (ID: Sannegarden)\n• Status: High-potential inbound lead paralyzed by extreme back-of-house understaffing.\n• Next Step: Propose Automated Pacing Throttle to protect kitchen workflow.\n\n💡 FAQ Tip: When a merchant is down on kitchen staff, emphasize that our system auto-stretches and pauses delivery incoming flows during intense dine-in rushes.` 
+            },
+            { 
+                side: "vendor", 
+                text: "/send automated_pacing_overview" 
+            },
+            { 
+                side: "agent", 
+                text: `Template Sent Successfully! 📄\n[Sannegarden_Auto_Pace_Control_Guide.pdf] has been shared with the merchant. Let me know if you need another account summary.` 
+            }
+        ]
+    },
+    'Amo': {
+        name: "Amo Seafood", address: "Järnvägsgatan 52A, Sundbyberg", grade: "A", phone: "+46707890123", email: "amo@example.com",
+        tags: ["Dream Brand", "Low Choice"], nuance: 1200, clean: 400, attempts: 4,
+        metrics: { google: 510, density: 215, ig: 3248 },
+        friction: "Quality Control Skepticism (Fears delivery transit damage to seafood)",
+        agentLog: `[LOG] Deploying Meta profile resolver: "Amo Seafood Sundbyberg"\n[STATUS]: Profile confirmed via geographical coordinate matching lookup loop.\n[SUCCESS]: Extracted 3,248 highly active Instagram followers. Matrix adjusted.`,
+        pitchContext: "Amo Seafood commands an elite digital following of 3,200+ fans. Tracking telemetry indicates intense local consumer demand vacuums for premium seafood. Post-meeting transcripts reveal the culinary team is highly protective of plating quality and fears delivery transit will destroy temperature constants.",
+        pitchAngle: "【Quality & Plating Integrity - Dedicated Premium Thermal Fleet】\n\"Hello Chef and the Amo Seafood team! We are huge fans of the incredible culinary work you do for your 3,200+ Instagram followers. We completely share your uncompromising stance on plating quality: premium oysters and crispy fried calamari simply cannot sit in a generic, uninsulated delivery bag for over 12 minutes without losing their magic. To safeguard your reputation, PrepMate will assign Amo Seafood exclusively to our 'Premium Dedicated Insulated Fleet.' We implement a strictly limited delivery radius and assign only top-tier couriers equipped with advanced, temperature-locked thermal gear. We guarantee your seafood arrives at the customer's doorstep with the exact texture, temperature, and presentation as it had when it left your pass.\"",
+        history: [
+            { type: "visit", date: "April 29, 2026", user: "BD Rep Elena", text: "Met with Chef. Chef stated fried calamari and premium oysters cannot sit in a standard uninsulated delivery bag for over 12 minutes." }
+        ],
+        chat: [
+            { 
+                side: "agent", 
+                text: `Account Summary: Amo Seafood (ID: Amo)\n• Status: Premium gourmet brand deeply skeptical of delivery transit damage to delicate food.\n• Next Step: Offer Dedicated Premium Thermal Fleet allocation & tight distance radius.\n\n💡 FAQ Tip: Defuse high-end culinary concerns by showing how our temperature-locked bags guarantee temperature constraints for seafood items.` 
+            },
+            { 
+                side: "vendor", 
+                text: "/send premium_fleet_specifications" 
+            },
+            { 
+                side: "agent", 
+                text: `Template Sent Successfully! 📄\n[Amo_Premium_Thermal_Logistics.pdf] has been shared with the merchant. Let me know if you need another account summary.` 
+            }
+        ]
+    },
+    'Bagens': {
+        name: "Bågens Mat & Bar Maria Park", address: "Grepgatan 36 Helsingborg", grade: "B", phone: "+46701234567", email: "bagen@example.com",
+        tags: ["Low Choice"], nuance: 400, clean: 300, attempts: 1,
+        metrics: { google: 271, density: 52, ig: 518 },
+        friction: "Marketing Budget Constraints (Cannot afford premium visibility setup costs)",
+        agentLog: `[LOG] Deploying Meta profile resolver: "Bagens Mat Bar Helsingborg"\n[STATUS]: Single match confirmed after physical string filtering logic parameters.\n[SUCCESS]: Tracked 518 followers. Updating base priority engine calculation tokens.`,
+        pitchContext: "Bågens Mat & Bar features solid baseline operations across a low-density category space (only 52 rivals). Voice AI ingestion traces show ownership is highly capital-constrained and refuses any upfront integration fees or premium search placement costs.",
+        pitchAngle: "【Cost Barriers - Zero Upfront Risk-Free Local Launch】\n\"Hello Bågens Mat & Bar team! We know how protective you have to be over your cash flow, and how draining it is when legacy platforms demand expensive upfront activation fees, hardware deposits, or hidden promotional charges. PrepMate is offering you a 100% risk-free, zero-upfront-cost partnership. Because our data shows a substantial culinary vacuum in Maria Park with only 52 local rivals, we are completely waiving your setup costs. Furthermore, we are injecting your kitchen into our premium 'Local Gems Organic Boost' tier completely free of charge to put you directly in front of nearby diners. We only make money when we successfully generate orders for you. No risk, no hidden fees—just pure revenue growth. Let's get you launched without spending a dime?\"",
+        history: [
+            { type: "call", date: "May 19, 2026", user: "BD Rep Tom", text: "Spoke to owner. Highly defensive about costs. Stated past platforms drained them with hidden activation and configuration fees." }
+        ],
+        chat: [
+            { 
+                side: "agent", 
+                text: `Account Summary: Bågens Mat & Bar (ID: Bagens)\n• Status: Extremely cash-flow defensive; burned by legacy platform hidden activation setup fees.\n• Next Step: Propose 100% Risk-Free Partnership with zero setup overhead.\n\n💡 FAQ Tip: If cost is a primary blocker, explicitly confirm that our partnership model features 0 upfront fees, completely eliminating launch risk.` 
+            },
+            { 
+                side: "vendor", 
+                text: "/send zero_cost_partnership_agreement" 
+            },
+            { 
+                side: "agent", 
+                text: `Template Sent Successfully! 📄\n[Bagens_Zero_Upfront_Agreement.pdf] has been shared with the merchant. Let me know if you need another account summary.` 
+            }
+        ]
+    },
+    'KnockKnock': {
+        name: "Knock Knock Café", address: "Värmlandsgatan 16A, Göteborg", grade: "B", phone: "+46702345678", email: "knockknock@example.com",
+        tags: ["Top Search"], nuance: 500, clean: 300, attempts: 2,
+        metrics: { google: 258, density: 145, ig: 1532 },
+        friction: "Loyalty Platform Lock-in (Deeply dependent on standalone legacy apps)",
+        agentLog: `[LOG] Deploying Meta profile resolver: "Knock Knock Cafe Goteborg"\n[STATUS]: Resolved cleanly after parsing geographical address tokens.\n[SUCCESS]: Extracted 1,532 followers. P-Score updating dynamically.`,
+        pitchContext: "Knock Knock Café commands premium regional organic web search metrics (+1,500 IG fans). Call log records verify the cafe is deeply tied to a legacy local customer loyalty app and fears listing on a macro delivery network will cannibalize their existing app ecosystem.",
+        pitchAngle: "【Protecting Private App Ecosystems - Pure New-Traffic Feeders】\n\"Hello Knock Knock team! We are incredibly impressed by the private community you have built—having 40% of your daily coffee orders run directly through your own custom text loyalty app is a massive operational victory. Please rest assured, PrepMate is not here to pull your regulars away from your app or break their habits. Our system is built to target 'pure net-new discovery traffic'—diners currently scanning our macro delivery networks who don't know your cafe exists yet. Best of all, we can embed your custom loyalty links directly inside your PrepMate store profile header. We act as an aggressive marketing funnel, capturing new local traffic and immediately routing them to become your private app subscribers. Let's work together to expand your ecosystem!\"",
+        history: [
+            { type: "visit", date: "May 03, 2026", user: "BD Rep Clara", text: "Met manager. Stated 40% of daily coffee orders run through their custom text-based loyalty app. Fears platform migration will break user habits." }
+        ],
+        chat: [
+            { 
+                side: "agent", 
+                text: `Account Summary: Knock Knock Café (ID: KnockKnock)\n• Status: Highly protective of private app ecosystem; fears macro delivery cannibalization.\n• Next Step: Propose 'Net-New Traffic Funnel' integration with embedded header loyalty links.\n\n💡 FAQ Tip: Reassure app-reliant merchants that we target pure net-new customer traffic, acting as an acquisition funnel for their private app ecosystem.` 
+            },
+            { 
+                side: "vendor", 
+                text: "/send loyalty_link_header_blueprint" 
+            },
+            { 
+                side: "agent", 
+                text: `Template Sent Successfully! 📄\n[KnockKnock_Loyalty_Bridge_Specs.pdf] has been shared with the merchant. Let me know if you need another account summary.` 
+            }
+        ]
+    },
+    'Pirog': {
+        name: "Pirog huset", address: "53 Valthornsvägen, Uppsala", grade: "C", phone: "+46704567890", email: "pirog@example.com",
+        tags: ["Low Choice"], nuance: 200, clean: 200, attempts: 0,
+        metrics: { google: 348, density: 82, ig: 412 },
+        friction: "Zero Digital Presence Profile (Complete lack of internal technical skills)",
+        agentLog: `[LOG] Deploying Meta profile resolver: "Pirog huset Uppsala"\n> ERROR: Meta Graph API returned 0 matching account parameters.\n> ACTIONS: Initializing Secondary Fallback Portal Search Chain (Google Places / Yelp Logs)...\n[RESULT]: Located unverified community marker data. Extracting baseline score tokens.`,
+        pitchContext: "Pirog huset operates in a low-density category vacuum but possesses zero formal social footprint (Agentic AI resolved zero verified Meta handles). Historical tracking profiles track that ownership consists of traditional family operators with near-zero modern computer capabilities.",
+        pitchAngle: "【Zero Technical Background - White-Glove Full Concierge Service】\n\"Hello Pirog huset team! Your traditional, handmade pirogues are an incredible product, and it is a true supply vacuum that your neighborhood cannot get them delivered. We know you run a traditional kitchen, focus entirely on the quality of your bake, and do not want to wrestle with complicated computers, apps, or websites. That is why PrepMate is deploying our specialized 'White-Glove Concierge Service' for you. You don't have to learn a single piece of software. Just take a quick phone photo of your handwritten paper menu ledger and text it to us. Our dedicated onboarding team will build your digital storefront, upload your products, and configure everything in the background. You just keep baking, and we'll take care of the tech!\"",
+        history: [
+            { type: "visit", date: "April 14, 2026", user: "BD Rep Sam", text: "Cold visit. Spoke with elderly founder. Exceptional traditional product, but they have no website, no social accounts, and use a paper order ledger book." }
+        ],
+        chat: [
+            { 
+                side: "agent", 
+                text: `Account Summary: Pirog huset (ID: Pirog)\n• Status: Traditional family kitchen; zero social media presence and absolute tech aversion.\n• Next Step: Propose White-Glove Full Concierge Service via WhatsApp menu photos.\n\n💡 FAQ Tip: For completely non-technical merchants, clarify that they only need to text a photo of their handwritten paper menu, and we handle the build entirely.` 
+            },
+            { 
+                side: "vendor", 
+                text: "/send concierge_welcome_pack" 
+            },
+            { 
+                side: "agent", 
+                text: `Template Sent Successfully! 📄\n[PirogHuset_Concierge_Onboarding.pdf] has been shared with the merchant. Let me know if you need another account summary.` 
+            }
+        ]
+    },
+    'Noburu': {
+        name: "NōBURU Sushi Karlavägen", address: "Karlavägen 59 Stockholm", grade: "C", phone: "+46706789012", email: "noburu@example.com",
+        tags: ["Top Search"], nuance: -1000, clean: 400, attempts: 1,
+        metrics: { google: 122, density: 118, ig: 442 },
+        friction: "Hyper-Saturated Local Red Ocean (Intense nearby premium sushi competition)",
+        agentLog: `[LOG] Deploying Meta profile resolver: "Noburu Sushi Karlavagen"\n[STATUS]: Resolved profile signature cleanly via string alignment distance matches.\n[SUCCESS]: Extracted 442 followers. Pipeline prioritization values recalculated.`,
+        pitchContext: "NōBURU Sushi is caught in an intense, over-saturated Stockholm red ocean category market zone (Tier 4 local nuance calculation applied a -1,000 pt deficit). Meeting notes identify they are heavily losing market share to surrounding high-end sushi operators.",
+        pitchAngle: "【Hyper-Competitive Red Ocean - Off-Peak & Late-Night Dominance】\n\"Hello NōBURU Sushi team, we completely understand how brutal it is to go head-to-head during the dinner rush when four premium sushi competitors have opened within a four-block radius, cutting your volume in half. PrepMate doesn't want to push you into that red ocean battle. Our live platform search metrics reveal an aggressive, unfulfilled search vacuum for high-end sushi during late-night hours and mid-afternoon off-peak gaps—exactly when your nearby competitors turn off their kitchens. We want to design a targeted campaign around high-margin 'Late Night Box Specials' and off-peak bundles, allowing you to capture a completely uncontested blue ocean market using your existing ingredients and staff. Let's reclaim your market share via the smart route!\"",
+        history: [
+            { type: "call", date: "May 22, 2026", user: "BD Rep Linus", text: "Spoke with owner. Highly pessimistic. Stated 4 other premium sushi locations opened within 4 blocks, cutting their dinner order volume in half." }
+        ],
+        chat: [
+            { 
+                side: "agent", 
+                text: `Account Summary: NōBURU Sushi (ID: Noburu)\n• Status: Losing high-density dinner volume to 4 surrounding premium sushi competitors.\n• Next Step: Propose Uncontested Off-Peak & Late-Night 'Blue Ocean' Campaign.\n\n💡 FAQ Tip: Overcome saturated market pessimism by switching focus to high-margin late-night gaps when surrounding competitors deactivate their kitchens.` 
+            },
+            { 
+                side: "vendor", 
+                text: "/send off_peak_strategy_blueprint" 
+            },
+            { 
+                side: "agent", 
+                text: `Template Sent Successfully! 📄\n[Noburu_Late_Night_Special_Layout.pdf] has been shared with the merchant. Let me know if you need another account summary.` 
+            }
+        ]
+    },
+    'Ninecha': {
+        name: "Ninecha", address: "Katarinavägen 20, Stockholm", grade: "B", phone: "+46709012345", email: "ninecha@example.com",
+        tags: ["Top Search", "Top GTC"], nuance: 500, clean: 300, attempts: 2,
+        metrics: { google: 274, density: 175, ig: 1842 },
+        friction: "Delivery Logistics Overhead (Fears platform couriers will disrupt store foot traffic)",
+        agentLog: `[LOG] Deploying Meta profile resolver: "Ninecha Stockholm"\n[STATUS]: Clean verification match. Multi-match ambiguity bypassed.\n[SUCCESS]: Extracted 1,842 active followers. Updating core priority score ledger.`,
+        pitchContext: "Ninecha commands an impressive, highly active digital community (+1,800 IG fans). Voice AI session data reveals the retail shop runs a very busy, compact physical checkout counter and worries that delivery drivers crowding the lobby will ruin their customer experience.",
+        pitchAngle: "【Compact Space & Lobby Friction - Curbside Side-Window Handoff Plan】\n\"Hello Ninecha team! We absolutely love the incredible retail energy and busy checkout queues at your shop, but we recognize your space is compact and premium. If delivery couriers stand inside your small lobby waiting for tea items, it crowds out your high-value walk-in customers and damages your brand experience. To solve this completely, PrepMate is activating our 'Curbside Courier Staging Blueprint' for your store. Our driver app uses precise GPS fencing to instruct couriers to wait strictly outside at your side pick-up window or a designated curbside zone. They are only alerted to approach when the order is 100% packaged. Your lobby stays completely dedicated to your retail foot traffic, while we scale your delivery numbers cleanly outside!\"",
+        history: [
+            { type: "visit", date: "May 11, 2026", user: "BD Rep Anna", text: "Visited cafe during afternoon rush. Long queues of tea buyers. Owner stated if couriers stand inside our tiny shop, traditional walk-in customers will walk away." }
+        ],
+        chat: [
+            { 
+                side: "agent", 
+                text: `Account Summary: Ninecha (ID: Ninecha)\n• Status: High-traffic boutique tea shop; fears waiting courier crowds will ruin compact retail lobby space.\n• Next Step: Propose Curbside Side-Window Handoff via GPS courier fencing.\n\n💡 FAQ Tip: Defuse small lobby friction points by noting our driver app utilizes geofencing parameters, ordering couriers to wait strictly outside until orders hit 100% completion.` 
+            },
+            { 
+                side: "vendor", 
+                text: "/send curbside_staging_plan" 
+            },
+            { 
+                side: "agent", 
+                text: `Template Sent Successfully! 📄\n[Ninecha_Curbside_Logistics_Blueprint.pdf] has been shared with the merchant. Let me know if you need another account summary.` 
+            }
+        ]
+    },
+    'MrChurros': {
+        name: "Mr churros", address: "Hamngatan 31, Stockholm", grade: "D", phone: "+46708901234", email: "mrchurros@example.com",
+        tags: [], nuance: -500, clean: 100, attempts: 0,
+        metrics: { google: 295, density: 48, ig: 1585 },
+        friction: "Baseline Quality Standard Disqualification (D-Grade economic tracking)",
+        agentLog: `[LOG] Deploying Meta profile resolver: "Mr churros Hamngatan"\n[STATUS]: Resolved signature cleanly via browser automation logs.\n[SUCCESS]: Tracked 1,585 followers. Priority ledger processed.`,
+        pitchAngle: "【COMPLIANCE LOCK ENGAGED - OUTBOUND SALES BLOCKED】\n[SECURITY NOTICE]: Outbound communication and narrative generation are locked automatically due to persistent operational deficits. Merchant has failed 2 consecutive regional health/sanitation compliance audits and maintains an unstable schedule (>50% unnotified closure variance). Representatives are strictly prohibited from issuing contract templates or pitch sequences until official health certification updates are supplied and a 14-day tracking audit clears basic platform safety thresholds.",
+        history: [
+            { type: "system_audit", date: "March 30, 2026", user: "Compliance Core Engine", text: "Automated audit flag: Merchant has failed 2 consecutive regional food safety inspections. Store operation schedule shows >50% unnotified weekly closure variance." }
+        ],
+        chat: [
+            { 
+                side: "agent", 
+                text: `Account Summary: Mr churros (ID: MrChurros)\n• Status: 🚨 DISQUALIFIED — Outbound sales communication blocked immediately.\n• Reason: Failed 2 consecutive regional sanitation audits; >50% unnotified weekly store closure.\n\n💡 FAQ Tip: Compliance Lock is active. Representatives are strictly prohibited from generating pitch proposals or onboarding contracts until official updated health certificates are uploaded.` 
+            },
+            { 
+                side: "vendor", 
+                text: "/check compliance_status" 
+            },
+            { 
+                side: "agent", 
+                text: `Action Blocked! ❌\nOutbound onboarding parameters are deactivated. Inform the vendor they must supply verified regional certification before automated security filters clear.` 
+            }
+        ]
+    }
+};
+
+// Static Text Assets for Feature 2 Deep-Dive View Console Streams
+const agentTreesOld = [
+            `[LOG] Lead_Ingestion: "Burger Craft Kitchen"\n> SEARCH_RESULTS: Exact 1-to-1 digital footprint matched via Meta Gateway.\n> ACTION: SEARCH: "Burger Craft Kitchen"...\n> EXTRACTING STRUCTURED PAYLOAD...\n\n[STATUS]: Confidence 99% - Merchant validation verified seamlessly.\n[RESULT]: Success: { ig: 3248, buzz: 8.4 }`,
+            `[LOG] Multi-Match Resolved: "Mamma Mia Trattoria"\n> SEARCH_RESULTS: 3 Instagram profiles identified within region.\n> ACTION: Extracting metadata and geo-coordinates.\n> COMPUTE: Mapping Levenshtein distance rules dynamically...\n\nCandidate_1: "92 Drottninggatan" -> Distance Error: 0.94\nCandidate_2: "14 Frödingsvägen"  -> Distance Error: 0.12 (Match Confirmed)\n\n[STATUS]: Confidence 94% - Target ledger node matched successfully.\n[RESULT]: Auto-merged verified Meta profile footprint cleanly into merchant record.`,
+            `[LOG] Lead_Discovery: "The Pirog House"\n> STATUS: Meta Graph API returned 0 matching verified accounts.\n> TRIGGER: Secondary Fallback Data Ingestion Portal Chain Engaged.\n> CRAWLING: [Google Places Aggregators / Local Yelp Audits]\n\n[FOUND]: High-quality traditional operator lacking digital management resources.\n[ACTION]: Flagged workspace console dashboard to [Concierge_Onboarding_Tier].\n[REASON]: Promising local supply-gap score recorded.`,
+            `[LOG] Anti-Bot Firewall Encountered over Meta Core Endpoint.\n[ERROR]: HTTP 429 - Volumetric Transaction Threshold Lockout.\n[STATUS]: Initializing Safe Telemetry Rotation Network (300s cool-down loop).\n[ACTION]: Shifting egress traffic via premium residential data proxy rotators.\n[TELEMETRY]: Simulating human browser signatures successfully.\n[RETRY]: Communication channel cleared. Data streaming active.`
+];
+
+// Static Object Overrides for Feature 3 Text Matrices
+const objectionDataOld = {
+            commission: {
+                json: `{\n  "vendor": "Mamma Mia Trattoria",\n  "friction": "commission_30_percent",\n  "demand_gap": "Organic Pizza Search +120%",\n  "strat": "Fixed_Cost_Dilution"\n}`,
+                context: "Mamma Mia Trattoria is pushing back intensely against our standard 30% commission rate due to inflation and margin pressure. However, our live heatmaps show an unfulfilled +120% spike in regional pizza searches. The kitchen has the physical capacity to produce more dough, meaning we can pitch a high-volume margin dilution model.",
+                angle: "【Overcoming Commission Resistance - The Fixed-Cost Dilution Pitch】\n\"Hi Mamma Mia Team, we completely understand your pushback on standard 30% delivery fees—with inflation hitting ingredient costs, protecting your margin is everything. However, our backend dashboard just flagged a massive +120% surge in local pizza searches right in your neighborhood that existing shops are failing to fulfill. We aren't looking to cut into your existing walk-in margins. PrepMate wants to channel this massive, untapped local demand directly into your kitchen during your slower hours. Since your fixed overhead—like rent and base kitchen staff payroll—is already paid for, these pure net-new orders will dramatically lower your overall cost per unit, turning quiet oven space into pure, incremental profit. Let's look at a customized volume-based fee schedule that guarantees your bottom line wins. Do you have 5 minutes for a quick margin simulation this week?\""
+            },
+            exclusivity: {
+                json: `{\n  "vendor": "Mamma Mia Trattoria",\n  "friction": "exclusivity_lock_in",\n  "competitor": "FoodDelivery_Global",\n  "strat": "Incremental_Peak_Capture"\n}`,
+                context: "The merchant is locked into a strict exclusivity contract with FoodDelivery Global and fears heavy legal fines. However, our regional courier logistics data shows that FoodDelivery Global experiences a 45% driver latency drop (severe delays) during Friday and Saturday dinner peaks. We can legally bypass the lock-in by positioning ourselves purely as a backup overflow channel.",
+                angle: "【Overcoming Exclusivity Contracts - The Peak-Hour Logistics Safety Net】\n\"Hi Mamma Mia Team, we highly respect your current exclusive partnership and your commitment to your contract. However, our real-time regional logistics data shows that during Friday and Saturday dinner rushes, local driver availability across your primary platform drops by 45%, leaving hungry customers waiting and food sitting under heat lamps. PrepMate doesn't want you to break your contract or face any penalties. Instead, we want to serve as your 'logistics safety net.' We can configure your PrepMate profile to sit on standby, activating strictly as an overflow channel when your primary provider's delivery radius hits a blockade or slows down. This keeps you 100% legally compliant while ensuring you never lose another peak-hour customer to logistics delays. Let's look at how we can secure your weekend revenue—can we hop on a brief call tomorrow?\""
+            },
+            tech: {
+                json: `{\n  "vendor": "Mamma Mia Trattoria",\n  "friction": "bandwidth_tech_fatigue",\n  "op_state": "Understaffed",\n  "strat": "Zero_Input_Management"\n}`,
+                context: "The owner is suffering from severe tablet fatigue and flatly refuses to have another device cluttering the host stand. On top of that, they are running short-staffed and cannot afford to have front-of-house employees wasting time manually re-typing delivery orders into their terminal.",
+                angle: "【Overcoming Tech Fatigue & Staffing Shortages - The Zero-Tablet Cloud Integration】\n\"Hi Mamma Mia Team, we know how incredibly stressful running a restaurant is right now, especially with the current kitchen labor shortage. The absolute last thing your front-of-house staff needs is another annoying, buzzing delivery tablet cluttering your counter and forcing your team to manually re-type orders while guests are waiting in line. PrepMate is completely tablet-free. We link directly into your existing cloud POS backend. When a delivery order is placed, it bypasses the host stand entirely and prints directly in your kitchen, automatically matching your ongoing line flow. Your staff won't have to look at a single screen, touch a single new button, or change a single operational habit. We handle 100% of the tech in the background so your team can focus entirely on food and hospitality. Let's schedule a 2-minute demo of what a tablet-free integration looks like?\""
+            }
+};
+
+        const mockLeadsOld = [
+            { id: 'X', name: "Lead X: Neo Ramen (Pre-opening)", t1_base: 30000, t2_tags: ["Top Search", "Low Choice"], t3_metrics: { compPerf: 145, reviews: 0, ig: 20000 }, t4_nuance: 1200, t5_cleanup: 300, t6_attempts: 3, desc: "Opening in 2 Days | High Vacuum Category | Verified" },
+            { id: 'Y', name: "Lead Y: Old Bistro (Established)", t1_base: 20000, t2_tags: ["Dream Brand"], t3_metrics: { compPerf: 50, reviews: 1500, ig: 200 }, t4_nuance: -1000, t5_cleanup: 500, t6_attempts: 0, desc: "Established 2012 | Over-saturated Category | High Intent" }
+        ];
+
+        function toggleGlobalView(viewState) {
+            const views = ['dashboard', 'rank', 'social', 'narratives', 'whatsapp'];
+            views.forEach(v => {
+                const viewPane = document.getElementById(`workspace-view-${v}`);
+                const navHeaderBtn = document.getElementById(`view-mode-${v}`);
+                if (viewPane) viewPane.classList.add('hidden');
+                if (navHeaderBtn) {
+                    navHeaderBtn.className = "px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all text-slate-500 hover:text-white";
+                }
+            });
+
+            const activeNodePane = document.getElementById(`workspace-view-${viewState}`);
+            const activeNodeBtn = document.getElementById(`view-mode-${viewState}`);
+            const stateTextIndicator = document.getElementById('panel-state-tracker');
+
+            if (activeNodePane) activeNodePane.classList.remove('hidden');
+            if (activeNodeBtn) {
+                if (viewState === 'dashboard') {
+                    activeNodeBtn.className = "px-4 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all bg-[#E53E3E] text-white";
+                } else {
+                    activeNodeBtn.className = "px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all bg-[#E53E3E] text-white";
+                }
+            }
+
+            if (viewState === 'dashboard') {
+                currentSlideIndex = 0;
+                stateTextIndicator.textContent = "Ecosystem Dashboard View Active";
+                recomputeScoringPipeline();
+                populateIntelligenceHub();
+            } else if (viewState === 'rank') {
+                currentSlideIndex = 1;
+                stateTextIndicator.textContent = "KPI-Driven Lead Ranking Blueprint View Active";
+                switchSubTab(activeSlide1Tab);
+            } else if (viewState === 'social') {
+                currentSlideIndex = 2;
+                stateTextIndicator.textContent = "Agentic AI Social Discovery Console Active";
+                switchAgentTree(0);
+            } else if (viewState === 'narratives') {
+                currentSlideIndex = 3;
+                stateTextIndicator.textContent = "AI Acquisition Sales Narratives Sandbox Active";
+                updateObjection('commission');
+            } else if (viewState === 'whatsapp') {
+                currentSlideIndex = 4;
+                stateTextIndicator.textContent = "WhatsApp PrepMate Co-Pilot Framework View Active";
+            }
+        }
+
+        function goToSlide(idx) {
+            const indexMap = ['dashboard', 'rank', 'social', 'narratives', 'whatsapp'];
+            toggleGlobalView(indexMap[idx]);
+        }
+        function nextSlide() { if (currentSlideIndex < 4) goToSlide(currentSlideIndex + 1); else goToSlide(0); }
+        function prevSlide() { if (currentSlideIndex > 0) goToSlide(currentSlideIndex - 1); else goToSlide(4); }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        // ---FEATURE 1 PANEL ---
+        function switchSubTab(idx) {
+            activeSlide1Tab = idx;
+            const blueprintEl = document.getElementById('slide-1-tab-blueprint');
+            const simulatorEl = document.getElementById('slide-1-tab-simulator');
+            const blueprintBtn = document.getElementById('tab-btn-blueprint');
+            const simulatorBtn = document.getElementById('tab-btn-simulator');
+
+            if (idx === 0) {
+                blueprintEl.classList.remove('hidden');
+                simulatorEl.classList.add('hidden');
+                blueprintBtn.className = "px-5 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all bg-[#E53E3E] text-white";
+                simulatorBtn.className = "px-5 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all text-slate-500 hover:text-white";
+            } else {
+                simulatorEl.classList.remove('hidden');
+                blueprintEl.classList.add('hidden');
+                simulatorBtn.className = "px-5 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all bg-[#E53E3E] text-white";
+                blueprintBtn.className = "px-5 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all text-slate-500 hover:text-white";
+                recalcScores();
+            }
+        }
+
+        function setPriorityMode(mode) {
+            currentPacingMode = mode;
+            document.getElementById('rep-quota-state').value = mode;
+            recalcScores();
+            recomputeScoringPipeline();
+        }
+
+        function updateNeglect(val) {
+            neglectDays = val;
+            document.getElementById('inertia-slider').value = val;
+            document.getElementById('inertia-lbl').textContent = `${val} Days`;
+            document.getElementById('neglect-val').textContent = `${val} days`;
+            recalcScores();
+            recomputeScoringPipeline();
+        }
+
+        function recalcScores() {
+            const container = document.getElementById('simulator-list');
+            const pacingAgent = document.getElementById('pacing-agent-checklist');
+            if (!container || !pacingAgent) return;
+            
+            if (currentPacingMode === 'quota') {
+                pacingAgent.innerHTML = `
+                    <div class="space-y-2">
+                        <p class="text-red-400 font-bold uppercase tracking-wide text-[9px]">🚨 Pacing Agent Directive:</p>
+                        <p class="text-slate-300 text-[10px] leading-relaxed">"System triggers Behind-Quota rules. Multiplying Online Presence Pulse parameters by 1.5x. Suppressing heavy enterprise structures to protect near-term pipeline velocity loops."</p>
+                    </div>`;
+            } else {
+                pacingAgent.innerHTML = `
+                    <div class="space-y-2">
+                        <p class="text-amber-400 font-bold uppercase tracking-wide text-[9px]">🌟 Pacing Agent Directive:</p>
+                        <p class="text-slate-300 text-[10px] leading-relaxed">"Quota metrics secure (>100% stretch mode verified). Shifting focus to target sophisticated dream brand pipelines."</p>
+                    </div>`;
+            }
+            
+            container.innerHTML = mockLeadsOld.map(l => {
+                let t2_score = l.t2_tags.length * 1500;
+                let t3_score = (l.t3_metrics.compPerf * 2) + (l.t3_metrics.reviews * 1) + (l.t3_metrics.ig * 0.1);
+                let t5_score = l.t5_cleanup;
+                let t6_warmth = Math.min(l.t6_attempts * 300, 1500);
+
+                if (currentPacingMode === 'quota') {
+                    t3_score *= 1.5; t5_score *= 1.5;
+                } else {
+                    t2_score *= 1.5;
+                }
+
+                let combinedBoost = t2_score + t3_score + l.t4_nuance + t5_score + t6_warmth;
+                let appliedBoost = Math.min(combinedBoost, 9999);
+                let totalPenalty = (neglectDays * 200) + (neglectDays > 30 ? 5000 : 0);
+                let total = Math.max(0, Math.round(l.t1_base + appliedBoost - totalPenalty));
+
+                return `
+                <div class="glass-card p-3.5 rounded-xl border border-white/5 font-mono text-[10px] space-y-1.5">
+                    <div class="flex justify-between items-start">
+                        <div><h4 class="font-bold text-white uppercase">${l.name}</h4><p class="text-[8.5px] text-slate-500">${l.desc}</p></div>
+                        <div class="text-right text-emerald-400 font-bold text-sm">${total.toLocaleString()}<span class="text-[7px] text-slate-500 block uppercase font-normal">pts</span></div>
+                    </div>
+                    <div class="flex gap-2 flex-wrap text-[8px] text-slate-400"><span class="code-pill">BASE: ${l.t1_base}</span><span class="code-pill">BOOST: +${Math.round(appliedBoost)}</span><span class="code-pill">PENALTY: -${totalPenalty}</span></div>
+                </div>`;
+            }).join('');
+        }
+
+        // ---SLIDE 2, 3 ---
+        function switchAgentTree(idx) {
+            const consoleBoxNode = document.getElementById('agent-console');
+            if (consoleBoxNode) consoleBoxNode.innerHTML = agentTreesOld[idx];
+            [0, 1, 2].forEach(i => {
+                const targetBtnNode = document.getElementById(`agent-btn-${i}`);
+                if (targetBtnNode) {
+                    targetBtnNode.className = (i === idx) ? "text-left p-2.5 rounded-xl glass-card border-l-2 border-indigo-500 text-xs font-bold text-white" : "text-left p-2.5 rounded-xl hover:bg-slate-800 text-xs font-bold text-slate-500 transition-colors";
+                }
+            });
+        }
+
+        function updateObjection(val) {
+            const data = objectionDataOld[val];
+            document.getElementById('json-input').textContent = data.json;
+            document.getElementById('sandbox-context').innerHTML = `<p class="animate-in fade-in duration-200">${data.context}</p>`;
+            document.getElementById('sandbox-angle').innerHTML = `<p class="animate-in fade-in duration-200">${data.angle}</p>`;
+        }
+
+        // --- PRIORITY PIPELINE CALs ---
+        function calculateUnifiedLeadPriorityScores() {
+            return Object.keys(completeMerchantDataWarehouse).map(key => {
+                const merchant = completeMerchantDataWarehouse[key];
+                const gradeFloorWeights = { "A": 30000, "B": 20000, "C": 10000, "D": 0 };
+                let tier1_base = gradeFloorWeights[merchant.grade];
+
+                let tier2_tags = merchant.tags.length * 1500;
+                let tier3_pulse = (merchant.metrics.density * 2) + (merchant.metrics.google * 1) + (merchant.metrics.ig * 0.1);
+                let tier4_nuance = merchant.nuance;
+                let tier5_clean = merchant.clean;
+                let tier6_warmth = Math.min(merchant.attempts * 300, 1500);
+
+                if (currentPacingMode === 'quota') {
+                    tier3_pulse *= 1.5; tier5_clean *= 1.5;
+                } else {
+                    tier2_tags *= 1.5;
+                }
+
+                let appliedBoostValue = Math.min(tier2_tags + tier3_pulse + tier4_nuance + tier5_clean + tier6_warmth, 9999);
+                let totalCalculatedPriorityScore = Math.max(0, Math.round(tier1_base + appliedBoostValue - ((currentDecayInertiaT * 200) + (currentDecayInertiaT > 30 ? 5000 : 0))));
+                if (merchant.grade === 'D') totalCalculatedPriorityScore = 0;
+
+                return { key: key, name: merchant.name, grade: merchant.grade, tags: merchant.tags, totalScore: totalCalculatedPriorityScore };
+            });
+        }
+
+        function handleLeadSelection(merchantId) {
+            selectedMerchantKey = merchantId;
+            populateIntelligenceHub();
+            recomputeScoringPipeline();
+        }
+
+        function handleQuotaOverride(val) {
+            currentPacingMode = val;
+            recomputeScoringPipeline();
+        }
+
+        function handleInertiaShift(val) {
+            currentDecayInertiaT = parseInt(val);
+            document.getElementById('inertia-lbl').textContent = `${val} Days`;
+            recomputeScoringPipeline();
+        }
+
+        function populateIntelligenceHub() {
+            const data = completeMerchantDataWarehouse[selectedMerchantKey];
+            if (!data) return;
+
+            document.getElementById('active-merchant-name').textContent = data.name;
+            document.getElementById('active-merchant-addr').textContent = data.address;
+            document.getElementById('active-merchant-grade').textContent = data.grade;
+            
+            document.getElementById('m-google-val').textContent = data.metrics.google.toLocaleString();
+            document.getElementById('m-comp-val').textContent = data.metrics.density.toLocaleString();
+            document.getElementById('m-ig-val').textContent = data.metrics.ig.toLocaleString();
+            
+            document.getElementById('agentic-terminal-log').textContent = data.agentLog;
+            document.getElementById('pitch-context-node').innerHTML = `<p class="editable-field">${data.pitchContext}</p>`;
+            document.getElementById('pitch-angle-node').innerHTML = `<p class="editable-field">${data.pitchAngle}</p>`;
+
+            const badge = document.getElementById('active-prio-badge');
+            if (data.grade === 'A') {
+                badge.className = "bg-red-950/60 border border-red-500/30 text-[#E53E3E] font-mono text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider";
+                badge.textContent = "High-Value Target (P1)";
+            } else if (data.grade === 'B') {
+                badge.className = "bg-blue-950/60 border border-blue-500/30 text-blue-400 font-mono text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider";
+                badge.textContent = "Standard Target (P2)";
+            } else if (data.grade === 'C') {
+                badge.className = "bg-amber-950/60 border border-amber-500/30 text-amber-400 font-mono text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider";
+                badge.textContent = "Low-Value Target (P3)";
+            } else {
+                badge.className = "bg-slate-900 border border-slate-700 text-slate-500 font-mono text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider";
+                badge.textContent = "Disqualified / Restricted";
+            }
+
+            document.getElementById('history-timeline-node').innerHTML = data.history.map(h => `
+                <div class="glass-card p-3 rounded-xl text-[11px]">
+                    <div class="flex justify-between text-[8px] font-mono text-slate-500 uppercase font-bold mb-0.5"><span>[${h.type}] • ${h.user}</span><span>${h.date}</span></div>
+                    <p class="text-slate-200">${h.text}</p>
+                </div>`).join('');
+
+            document.getElementById('whatsapp-message-box').innerHTML = data.chat.map(c => {
+                if (c.side === 'system') return `<div class="text-center text-[8px] font-mono text-slate-500 uppercase bg-slate-900/40 py-0.5 rounded border border-white/5 tracking-wider">${c.text}</div>`;
+                if (c.side === 'agent') return `<div class="max-w-[85%] bg-[#202C33] p-2 rounded-xl text-slate-200 border border-white/5"><p>${c.text}</p></div>`;
+                return `<div class="flex justify-end"><div class="max-w-[80%] bg-[#005C4B] p-2 rounded-xl text-white"><p>${c.text}</p></div></div>`;
+            }).join('');
+        }
+
+        function recomputeScoringPipeline() {
+            const listNode = document.getElementById('pipeline-leads-list');
+            const pacingNode = document.getElementById('pacing-worklist-panel');
+            if (!listNode || !pacingNode) return;
+
+            if (currentPacingMode === 'quota') {
+    pacingNode.innerHTML = `
+        <div class="space-y-2 animate-in fade-in duration-200">
+            <span class="text-red-400 font-bold block uppercase tracking-tight text-[9px]">🚨 Pipeline KPI Gap (&lt;50% met):</span>
+            <p class="text-slate-300 text-[10px] leading-snug">"KPI Pacing gap detected. Boosting high-velocity vendors (Tier 3/5) by 1.5x multiplier. Pausing long-cycle resto tracks to secure immediate wins."</p>
+            <div class="bg-black/30 p-2 rounded border border-red-500/10 font-mono text-emerald-400 text-[9px] leading-normal">
+                <b>Today's Action Checklist:</b><br>
+                • Ingest 5 fast-converting local outbounds (competitor hot-lists)<br>
+                • 3 geo-optimized field visits via automated 3km radius map<br>
+                • Clear document bottlenecks for 2 ongoing leads
+            </div>
+        </div>`;
+} else {
+    pacingNode.innerHTML = `
+        <div class="space-y-2 animate-in fade-in duration-200">
+            <span class="text-amber-400 font-bold block uppercase tracking-tight text-[9px]">🌟 Monthly KPI Secure (&gt;100% met):</span>
+            <p class="text-slate-300 text-[10px] leading-snug">"KPI locked. Activating High-Value Growth. Re-weighting Prepmate lists to favor Tier 2 Strategic Tags (1.5x) to salvage high-performance lost/terminated accounts."</p>
+            <div class="bg-black/30 p-2 rounded border border-amber-500/10 font-mono text-emerald-400 text-[9px] leading-normal">
+                <b>Today's Action Checklist:</b><br>
+                • Salvage 2 high-GMV terminated accounts via Win-Back offer<br>
+                • Execute 1 restaurant chain 'Dream Brand' deep-dive pitch<br>
+                • Conduct 1 localized Supply-Gap analytics
+            </div>
+        </div>`;
+}
+
+            const computedRecords = calculateUnifiedLeadPriorityScores();
+            computedRecords.sort((a, b) => b.totalScore - a.totalScore);
+
+            listNode.innerHTML = computedRecords.map((l, idx) => {
+                const isActiveCard = (l.key === selectedMerchantKey) ? 'active' : '';
+                return `
+                <div onclick="handleLeadSelection('${l.key}')" class="lead-card ${isActiveCard} glass-card p-2.5 rounded-xl cursor-pointer hover:bg-white/5 relative group">
+                    <div class="flex justify-between items-start mb-1">
+                        <div>
+                            <span class="text-[7.5px] font-mono font-bold text-slate-500 block uppercase">Rank #0${idx + 1}</span>
+                            <h4 class="text-xs font-black text-white truncate font-mono uppercase tracking-tight mt-0.5 group-hover:text-red-400 transition-colors">${l.name}</h4>
+                        </div>
+                        <span class="text-[7.5px] font-black font-mono ${l.grade === 'D' ? 'text-slate-500 bg-slate-900 border-slate-800' : 'text-red-400 bg-red-950/40 border-red-500/20'} px-1.5 py-0.5 border rounded uppercase">G-${l.grade}</span>
+                    </div>
+                    <div class="flex justify-between items-end">
+                        <div class="flex gap-1 flex-wrap max-w-[65%]">${l.tags.map(t => `<span class="text-[6.5px] bg-slate-900 border border-slate-700 px-1 py-0.5 rounded text-slate-300 font-bold uppercase">${t}</span>`).join('')}</div>
+                        <div class="text-right"><div class="text-xs font-black text-emerald-400 font-mono">${l.totalScore.toLocaleString()}</div></div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            document.getElementById('queue-count').textContent = `${computedRecords.length} Targets Prioritized`;
+        }
+
+        // Controls
+        function toggleWorkspaceEdit() {
+            const isEditing = document.getElementById('edit-mode-toggle').checked;
+            document.body.classList.toggle('editing-active', isEditing);
+            const dot = document.getElementById('toggle-dot');
+            const bg = document.getElementById('toggle-bg');
+            if (dot && bg) {
+                dot.style.transform = isEditing ? 'translateX(12px)' : 'translateX(0px)';
+                bg.style.backgroundColor = isEditing ? '#E53E3E' : '#475569';
+            }
+            document.querySelectorAll('h2, h3, h4, p, span, li').forEach(el => {
+                if (!el.closest('select') && !el.closest('input') && !el.closest('button') && !el.closest('nav') && !el.classList.contains('code-pill')) {
+                    el.contentEditable = isEditing ? "true" : "false";
+                    el.classList.toggle('editable-field', isEditing);
+                }
+            });
+        }
+
+        function exportWorkspaceSnap() {
+            const toggle = document.getElementById('edit-mode-toggle');
+            if (toggle && toggle.checked) { toggle.checked = false; toggleWorkspaceEdit(); }
+            const cleanClone = document.documentElement.cloneNode(true);
+            cleanClone.querySelectorAll('.no-export').forEach(el => el.remove());
+            cleanClone.querySelectorAll('.editable-field').forEach(el => { el.classList.remove('editable-field'); el.removeAttribute('contenteditable'); });
+            const fileBlob = new Blob([cleanClone.outerHTML], { type: 'text/html' });
+            const temporaryUrl = URL.createObjectURL(fileBlob);
+            const anchor = document.createElement('a');
+            anchor.href = temporaryUrl; anchor.download = 'prepmate_ecosystem_snapshot.html';
+            document.body.appendChild(anchor); anchor.click(); document.body.removeChild(anchor);
+            URL.revokeObjectURL(temporaryUrl);
+        }
+
+        function switchHubView(tabIndex) {
+            subHubViewIndex = tabIndex;
+            [0,1,2].forEach(idx => {
+                const pane = document.getElementById(`hub-view-${idx}`);
+                const tab = document.getElementById(`hub-tab-${idx}`);
+                if (pane && tab) {
+                    if (idx === tabIndex) { pane.classList.remove('hidden'); tab.classList.add('active'); } 
+                    else { pane.classList.add('hidden'); tab.classList.remove('active'); }
+                }
+            });
+            if (tabIndex === 0) populateIntelligenceHub();
+        }
+
+        window.onload = () => {
+            recomputeScoringPipeline();
+            handleLeadSelection('Tornet');
+            toggleGlobalView('dashboard');
+        };
+    </script>
+</body>
+</html>
